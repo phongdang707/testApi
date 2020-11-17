@@ -11,12 +11,13 @@ const router = express.Router();
 // desc:    get list of users
 // access:  PUBLIC
 module.exports.getUser = (req, res, next) => {
-  console.log("get routers");
-  User.find()
-    .then(users => {
-      res.status(200).json(users);
-    })
-    .catch(err => res.json(err));
+  // console.log("get routers");
+  // User.find()
+  //   .then(users => {
+  //     res.status(200).json(users);
+  //   })
+  //   .catch(err => res.json(err));
+  res.send("phong");
 };
 
 // route:   POST  {host}/api/users
@@ -32,7 +33,7 @@ module.exports.createUser = (req, res, next) => {
     password,
     DOB,
     userType,
-    phone
+    phone,
   });
 
   bcrypt.genSalt(10, (err, salt) => {
@@ -43,10 +44,10 @@ module.exports.createUser = (req, res, next) => {
 
       newUser
         .save()
-        .then(user => {
+        .then((user) => {
           res.status(200).json(user);
         })
-        .catch(err => res.json(err));
+        .catch((err) => res.json(err));
     });
   });
 };
@@ -55,19 +56,19 @@ module.exports.getUserById = (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(400).json({ message: "id invalid" });
   User.findById(id)
-    .then(user => {
+    .then((user) => {
       if (!user)
         return Promise.reject({ status: 404, message: "User not found" });
       res.status(200).json(user);
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(err.status).json({ message: err.message });
     });
 };
 module.exports.updateUserById = (req, res, next) => {
   const { id } = req.params;
   User.findById(id)
-    .then(user => {
+    .then((user) => {
       if (!user)
         return Promise.reject({ status: 404, message: "User not found" });
       const { email, password, DOB, userType, phone } = req.body;
@@ -79,10 +80,10 @@ module.exports.updateUserById = (req, res, next) => {
 
       return user.save();
     })
-    .then(user => {
+    .then((user) => {
       res.status(200).json(user);
     })
-    .catch(err => {
+    .catch((err) => {
       if (!err.status) return res.json(err);
       res.status(err.status).json(err.message);
     });
@@ -90,31 +91,31 @@ module.exports.updateUserById = (req, res, next) => {
 module.exports.deleteUserById = (req, res, next) => {
   const { id } = req.params;
   User.deleteOne({ _id: id })
-    .then(result => res.status(200).json(result))
-    .catch(err => err.json(err));
+    .then((result) => res.status(200).json(result))
+    .catch((err) => err.json(err));
 };
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email })
-    .then(user => {
+    .then((user) => {
       if (!user)
         return Promise.reject({ status: 404, message: "User Not found" });
       bcrypt.compare(password, user.password, (err, isMath) => {
         if (!isMath) return res.status(400).json({ message: "Wrong password" });
         const payload = {
           email: user.email,
-          userType: user.userType
+          userType: user.userType,
         };
         jwt.sign(payload, "XEDIKE", { expiresIn: 3600 }, (err, token) => {
           if (err) res.json(err);
           res.status(200).json({
             success: true,
-            token
+            token,
           });
         });
       });
     })
-    .catch(err => {
+    .catch((err) => {
       if (err.status) return res.json(err);
       res.status(err.status);
     });
